@@ -36,8 +36,6 @@ properties
 ("Finesse,Light")
 );
 
-
-
 CREATE TABLE damage_type
 (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
 name VARCHAR(100) NOT NULL,
