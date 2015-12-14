@@ -70,9 +70,21 @@ Discription (Markdown):<br>
 <?php
 ini_set('display_errors', 1);
 $servername = "23.229.141.5";
-$username = "burneykb";
-$password = "007zombie";
+//$username = "burneykb";
+//$password = "007zombie";
 $db = "dnddb";
+
+// Get $username and $password
+$success = include "credentials.php";
+if (!$success) {
+    echo "<p>Failed to get credentials.  Please create a file called `credentials.php` in the " . getcwd() . " directory.  "
+    echo "In that file copy the following text filling in the sections in /</>.<br>"
+    echo "<code>\n"
+    echo "$username = \"<username>\"\n";
+    echo "$password = \"<password>\"\n";
+    echo "<\code>\n"
+    exit();
+}
 
 // Create connection
 $conn = new mysqli($servername, $username, $password, $db);
