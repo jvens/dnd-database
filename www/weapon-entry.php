@@ -3,7 +3,7 @@
 
 <form method='post'>
 
-Name: <input type='text' name='name' autofocus> <br>
+Name: <input type='text' name='name' autofocus required="true"> <br>
 Proficiency: <input list='proficiency' name='proficiency' multiple><br>
 Type: <br>
 <ul>
@@ -31,7 +31,7 @@ Properties:<br>
 </ul>
 
 Discription (Markdown):<br>
-<textarea name='description'></textarea><br>
+<textarea name='description' required="true"></textarea><br>
 
 
 <input type='submit'>
@@ -60,6 +60,9 @@ Discription (Markdown):<br>
 
 </form>
 
+<div id="conStatus"></div>
+
+
 
 </body>
 </html>
@@ -67,8 +70,8 @@ Discription (Markdown):<br>
 <?php
 ini_set('display_errors', 1);
 $servername = "23.229.141.5";
-$username = "";
-$password = "";
+$username = "burneykb";
+$password = "007zombie";
 $db = "dnddb";
 
 // Create connection
@@ -79,46 +82,62 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 } 
 
-echo "Connected successfully";
+echo "<span style='background-color: #00ff00'>Connected successfully";
 echo "<br>";
 
-
-
-if(isset($_POST['name']))
+if($_SERVER['REQUEST_METHOD'] === 'POST')
 {
-
-
+	if ($_POST['cost'] == '')
+	{
+		$_POST['cost'] = '0';
+	}
+	// var_dump($_POST);
 	$query = "INSERT INTO weapon ";
-	$query.= "(name,description,proficiency,type,`range`,cost,damage,damage_type_id,weight,properties)";
+	$query.= "(name,description,proficiency,";
+	if (isset($_POST['type']))
+	{
+		$query.= "type,";
+	}
+	$query.= "`range`,cost,damage,damage_type_id,weight";
+	if (isset($_POST['properties']))
+	{
+		$query.= ",properties";
+	}
+	$query.= ")";
 	$query.= " VALUES (";
-	$query.= "'{$_POST['name']}', '{$_POST['description']}', '{$_POST['proficiency']}', ('";
-	foreach ($_POST['type'] as $type) {
-		$query.= "{$type},";
+	$query.= "'{$_POST['name']}', '{$_POST['description']}', '{$_POST['proficiency']}', ";
+	if (isset($_POST['type']) && is_array($_POST['type']))
+	{
+		$query.= "('";
+		foreach ($_POST['type'] as $type) {
+			$query.= "{$type},";
+		}	
+		$query = rtrim($query, ",");
+		$query.= "'),";
 	}
-	$query = rtrim($query, ",");
-	$query.= "'),";
-	$query.= "{$_POST['range']}, {$_POST['cost']}, '{$_POST['damage']}', {$_POST['damage_type']}, {$_POST['weight']}, ('";
-	foreach ($_POST['properties'] as $property) {
-		$query.= "{$property},";
+	$query.= "'{$_POST['range']}', {$_POST['cost']}, '{$_POST['damage']}', {$_POST['damage_type']}, {$_POST['weight']}";
+	if (isset($_POST['properties']) && is_array($_POST['properties']))
+	{
+		$query.= ", ('";
+		foreach ($_POST['properties'] as $property) {
+			$query.= "{$property},";
+		}
+		$query = rtrim($query, ",");
+		$query.= "')";
 	}
-	$query = rtrim($query, ",");
-	$query.= "'));";
-
-
+	$query.= ");";
 	if ($conn->query($query) === TRUE) {
-    	$alertString = '<script language="javascript">';
-		$alertString .= 'alert("New record created successfully")';
-		$alertString .= '</script>';
+    	$alertString = 'New record created successfully';
 	} else {
-	    $alertString .= '<script language="javascript">';
-		$alertString .= 'alert("Error: " . $sql . "<br>" . $conn->error)';
-		$alertString .= '</script>';
+	    echo 'Error: "' . $query . "<br>" . $conn->error;
 	}
 }
 
 if(isset($alertString))
 {
-	echo $alertString;
+	echo '<script language="javascript">';
+	echo 'alert("'. $alertString .'");';
+	echo '</script>';
 }
 
 $conn->close();
